@@ -1,0 +1,16 @@
+# Robots.txt for Anti-AI Qwen UAV Simulator Lesson 7
+# https://anti-ai-qwen-uav-simulator-lesson-7.vercel.app/
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://anti-ai-qwen-uav-simulator-lesson-7.vercel.app/sitemap.xml
+
+# Закрыть технические файлы (опционально)
+Disallow: /node_modules/
+Disallow: /.git/
+Disallow: /.github/
+Disallow: /package.json
+Disallow: /package-lock.json
+Disallow: /vercel.json
