@@ -270,6 +270,9 @@ body{ overflow: hidden; font-family:'Segoe UI','Orbitron', monospace; background
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
+// ✅ ИСПРАВЛЕНИЕ: весь код обёрнут в DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+
 const MAX_RAIN_COUNT = 800;
 
 const DIFFICULTY_CONFIG = {
@@ -459,6 +462,9 @@ function showCopySuccess(btn){
 }
 document.getElementById('copyPhoneBtn').addEventListener('click', copyPhone);
 
+let audioCtx = null;
+let audioHintShown = false;
+
 async function startAudio(){
   if(audioCtx && audioCtx.state === 'suspended'){
     try{ await audioCtx.resume(); } catch(e){}
@@ -507,9 +513,6 @@ function applyDifficultyConfig(difficulty){
   
   console.log(`✅ Применена сложность: ${diffConfig.name}`);
 }
-
-let audioCtx = null;
-let audioHintShown = false;
 
 function ensureAudio(){
   if(!audioCtx){
@@ -616,7 +619,6 @@ function clearActiveAnimations(){
   activeAnimations = [];
 }
 
-// ✅ ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ: Полный сброс UI
 function resetAllUI(){
   const hitsElem = document.getElementById('hits');
   if(hitsElem) hitsElem.innerText = '0';
@@ -723,11 +725,9 @@ function fullGameRestart(){
   }, 500);
 }
 
-// ✅ УЛУЧШЕННАЯ ФУНКЦИЯ: Полный сброс состояния при аварийной остановке
 function emergencyStop(){
   if(!droneGroup) return;
   
-  // 1. Остановка всех процессов
   if(state.timerInterval){
     clearInterval(state.timerInterval);
     state.timerInterval = null;
@@ -735,7 +735,6 @@ function emergencyStop(){
   
   clearActiveAnimations();
   
-  // 2. Полный сброс физического состояния дрона
   state.velocity = { x: 0, z: 0, y: 0 };
   state.altitude = CONFIG.START_ALTITUDE;
   state.targetAltitude = CONFIG.START_ALTITUDE;
@@ -748,14 +747,12 @@ function emergencyStop(){
   windChangeTimer = 0;
   lightningTimer = 0;
   
-  // 3. ✅ НОВОЕ: Полный сброс игровых показателей
   state.health = 100;
   state.lightningHits = 0;
   state.deliveredCount = 0;
   state.currentTarget = null;
   state.captureStartTime = 0;
   
-  // 4. Сброс позиции дрона и камеры
   droneGroup.position.set(0, state.altitude, 0);
   droneGroup.rotation.set(0, 0, 0);
   
@@ -764,14 +761,12 @@ function emergencyStop(){
     camera.lookAt(0, state.altitude, 0);
   }
   
-  // 5. ✅ НОВОЕ: Сброс всех целей в начальное состояние
   for(let t of targets){
     if(t && typeof t.reset === 'function'){
       t.reset();
     }
   }
   
-  // 6. ✅ НОВОЕ: Сброс trail (следа)
   trailParticles.forEach(p => {
     p.visible = false;
     p.scale.set(1, 1, 1);
@@ -786,14 +781,11 @@ function emergencyStop(){
   state.trailTimer = 0;
   state.propAngle = 0;
   
-  // 7. Полный сброс UI
   resetAllUI();
   
-  // 8. Перезапуск таймера
   state.timeLeft = CONFIG.MISSION_TIME;
   startMissionTimer();
   
-  // 9. Перезапуск анимации если остановлена
   if(!state.animationId && state.simulatorInitialized){
     animate(performance.now());
   }
@@ -1680,6 +1672,8 @@ window.addEventListener('beforeunload', () => {
   }
   if(renderer) renderer.dispose();
 });
+
+}); // ✅ Закрытие DOMContentLoaded
 </script>
 </body>
 </html>
